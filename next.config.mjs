@@ -16,11 +16,10 @@ const nextConfig = {
     unoptimized: true,
     domains: ['images.unsplash.com'],
   },
-  // Add this to allow access from your local network IP
-  allowedDevOrigins: ['http://192.168.1.103:3000'],
   experimental: {
-    // Allow more experimental features
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ['localhost:3000', 'vehicle-tracker.vercel.app']
+    }
   }
 }
 
