@@ -8,9 +8,15 @@ try {
   console.log("🧹 Cleaning up existing Prisma generated files...")
   execSync("rm -rf node_modules/.prisma")
 
+  // Only run migrations in production
+  if (process.env.VERCEL_ENV === 'production') {
+    console.log('Running prisma migrations...');
+    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+  }
+
   // Generate Prisma client
   console.log("🔧 Generating Prisma client...")
-  execSync("npx prisma generate")
+  execSync("npx prisma generate", { stdio: 'inherit' })
 
   // Run the Next.js build
   console.log("🏗️ Building Next.js application...")
