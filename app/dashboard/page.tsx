@@ -97,30 +97,97 @@ export default function DashboardPage() {
             </div>
           </TabsContent>
           <TabsContent value="analytics" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Advanced Analytics</CardTitle>
-                <CardDescription>Detailed analysis of vehicle sightings and patterns</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[400px] flex items-center justify-center border rounded-md">
-                  <p className="text-muted-foreground">Advanced analytics content will be displayed here</p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid gap-4">
+              <Card className="col-span-full">
+                <CardHeader>
+                  <CardTitle>Advanced Analytics</CardTitle>
+                  <CardDescription>Detailed analysis of vehicle sightings and patterns</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Analytics cards */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Pattern Analysis</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[300px] flex items-center justify-center border rounded-md">
+                          <p className="text-muted-foreground">Pattern analysis visualization</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Time Distribution</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[300px] flex items-center justify-center border rounded-md">
+                          <p className="text-muted-foreground">Time-based distribution chart</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Location Clusters</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[300px] flex items-center justify-center border rounded-md">
+                          <p className="text-muted-foreground">Location cluster analysis</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
           <TabsContent value="reports" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Reports</CardTitle>
-                <CardDescription>Generate and download reports</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[400px] flex items-center justify-center border rounded-md">
-                  <p className="text-muted-foreground">Reports content will be displayed here</p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid gap-4">
+              <Card className="col-span-full">
+                <CardHeader>
+                  <CardTitle>Reports</CardTitle>
+                  <CardDescription>Generate and download reports</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Report types */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Daily Summary</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[300px] flex flex-col items-center justify-center gap-4 border rounded-md p-4">
+                          <p className="text-muted-foreground text-center">Daily vehicle sightings summary</p>
+                          <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md">Generate Report</button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Weekly Analysis</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[300px] flex flex-col items-center justify-center gap-4 border rounded-md p-4">
+                          <p className="text-muted-foreground text-center">Weekly trends and patterns</p>
+                          <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md">Generate Report</button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Monthly Statistics</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[300px] flex flex-col items-center justify-center gap-4 border rounded-md p-4">
+                          <p className="text-muted-foreground text-center">Monthly statistical report and analysis</p>
+                          <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md">Generate Report</button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

@@ -19,40 +19,46 @@ export default function VideosPage() {
           <TabsTrigger value="queue">Processing Queue</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="upload">
-          <Card>
-            <CardHeader>
-              <CardTitle>Upload Video</CardTitle>
-              <CardDescription>Upload video footage for license plate detection</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <VideoUpload />
-            </CardContent>
-          </Card>
+        <TabsContent value="upload" className="w-full space-y-4">
+          <div className="grid gap-4">
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>Upload Video</CardTitle>
+                <CardDescription>Upload video footage for license plate detection</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <VideoUpload />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
-        <TabsContent value="videos">
-          <Card>
-            <CardHeader>
-              <CardTitle>My Videos</CardTitle>
-              <CardDescription>View and manage your uploaded videos</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <VideoList />
-            </CardContent>
-          </Card>
+        <TabsContent value="videos" className="w-full space-y-4">
+          <div className="grid gap-4">
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>My Videos</CardTitle>
+                <CardDescription>View and manage your uploaded videos</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <VideoList />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
-        <TabsContent value="queue">
-          <Card>
-            <CardHeader>
-              <CardTitle>Processing Queue</CardTitle>
-              <CardDescription>Monitor the status of video processing jobs</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ProcessingQueue />
-            </CardContent>
-          </Card>
+        <TabsContent value="queue" className="w-full space-y-4">
+          <div className="grid gap-4">
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>Processing Queue</CardTitle>
+                <CardDescription>Monitor the status of video processing jobs</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ProcessingQueue />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

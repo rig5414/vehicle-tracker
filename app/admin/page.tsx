@@ -19,40 +19,46 @@ export default function AdminPage() {
           <TabsTrigger value="api">API Keys</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <CardTitle>User Management</CardTitle>
-              <CardDescription>Add, edit, or remove users from the system</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <UserManagement />
-            </CardContent>
-          </Card>
+        <TabsContent value="users" className="w-full space-y-4">
+          <div className="grid gap-4">
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>User Management</CardTitle>
+                <CardDescription>Add, edit, or remove users from the system</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <UserManagement />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
-        <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Settings</CardTitle>
-              <CardDescription>Configure system-wide settings and preferences</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SystemSettings />
-            </CardContent>
-          </Card>
+        <TabsContent value="settings" className="w-full space-y-4">
+          <div className="grid gap-4">
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>System Settings</CardTitle>
+                <CardDescription>Configure system-wide settings and preferences</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <SystemSettings />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
-        <TabsContent value="api">
-          <Card>
-            <CardHeader>
-              <CardTitle>API Keys</CardTitle>
-              <CardDescription>Manage API keys for external integrations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ApiKeys />
-            </CardContent>
-          </Card>
+        <TabsContent value="api" className="w-full space-y-4">
+          <div className="grid gap-4">
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>API Keys</CardTitle>
+                <CardDescription>Manage API keys for external integrations</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ApiKeys />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
