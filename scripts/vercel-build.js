@@ -1,7 +1,21 @@
-const { execSync } = require("child_process")
+const { execSync } = require("child_process");
+const fs = require('fs');
+const path = require('path');
 
 // Log the start of the build process
-console.log("🚀 Starting Vercel build process")
+console.log("🚀 Starting Vercel build process");
+
+// Function to safely delete directory
+function safeRemoveDir(dirPath) {
+  try {
+    if (fs.existsSync(dirPath)) {
+      fs.rmSync(dirPath, { recursive: true, force: true });
+      console.log(`Successfully removed ${dirPath}`);
+    }
+  } catch (error) {
+    console.warn(`Warning: Could not remove directory ${dirPath}:`, error);
+  }
+}
 
 // Check if DATABASE_URL is set
 if (!process.env.DATABASE_URL) {
@@ -9,7 +23,7 @@ if (!process.env.DATABASE_URL) {
 } else {
   try {
     console.log("🧹 Cleaning up existing Prisma generated files...")
-    execSync("rm -rf node_modules/.prisma")
+    safeRemoveDir(path.join('node_modules', '.prisma'));
 
     console.log('Running prisma generate...');
     execSync('npx prisma generate', { stdio: 'inherit' });
