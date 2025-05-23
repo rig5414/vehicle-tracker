@@ -15,7 +15,7 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="flex flex-col h-full">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <Car className="h-5 w-5" />
@@ -23,7 +23,8 @@ export default function Home() {
             </CardTitle>
             <CardDescription>View key metrics and analytics</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col flex-grow">
+            <div className="flex-grow" />
             <Link href="/dashboard">
               <Button className="w-full">
                 Go to Dashboard
@@ -33,7 +34,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="flex flex-col h-full">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5" />
@@ -41,7 +42,8 @@ export default function Home() {
             </CardTitle>
             <CardDescription>Find vehicles by plate number</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col flex-grow">
+            <div className="flex-grow" />
             <Link href="/search">
               <Button className="w-full">
                 Search Vehicles
@@ -51,7 +53,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="flex flex-col h-full">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <Map className="h-5 w-5" />
@@ -59,7 +61,8 @@ export default function Home() {
             </CardTitle>
             <CardDescription>Track vehicle locations and movement</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col flex-grow">
+            <div className="flex-grow" />
             <Link href="/map">
               <Button className="w-full">
                 View Map
@@ -69,7 +72,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="flex flex-col h-full">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <Video className="h-5 w-5" />
@@ -77,7 +80,8 @@ export default function Home() {
             </CardTitle>
             <CardDescription>Upload and process video footage</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col flex-grow">
+            <div className="flex-grow" />
             <Link href="/videos">
               <Button className="w-full">
                 Process Videos
