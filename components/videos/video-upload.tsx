@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -11,24 +9,44 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
-import { Upload, X } from "lucide-react"
+import { Upload, X, AlertCircle } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
+const ALLOWED_FILE_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/x-matroska"];
 
 const formSchema = z.object({
   title: z.string().min(2, {
     message: "Title must be at least 2 characters.",
   }),
   description: z.string().optional(),
-  location: z.string().optional(),
-  videoFile: z.any().refine((file) => file?.length === 1, {
-    message: "Video file is required.",
+  location: z.string().min(2, {
+    message: "Location is required for video processing.",
   }),
-})
+  videoFile: z
+    .any()
+    .refine((files) => files?.length === 1, "Video file is required.")
+    .refine(
+      (files) => files?.[0]?.size <= MAX_FILE_SIZE,
+      `Max file size is 500MB.`
+    )
+    .refine(
+      (files) => ALLOWED_FILE_TYPES.includes(files?.[0]?.type),
+      "Only .mp4, .mov, .avi, and .mkv files are accepted."
+    ),
+});
+
+type UploadProgressEvent = {
+  loaded: number
+  total: number
+}
 
 export function VideoUpload() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const { toast } = useToast()
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -40,50 +58,64 @@ export function VideoUpload() {
     },
   })
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
+    setUploadError(null)
+    setUploadProgress(0)
+
     if (files && files.length > 0) {
-      setSelectedFile(files[0])
+      const file = files[0]
+      
+      if (file.size > MAX_FILE_SIZE) {
+        setUploadError("File size exceeds 500MB limit")
+        event.target.value = ""
+        return
+      }
+      
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        setUploadError("Invalid file type. Only .mp4, .mov, .avi, and .mkv files are accepted")
+        event.target.value = ""
+        return
+      }
+      
+      setSelectedFile(file)
       form.setValue("videoFile", files)
     }
-  }
+  }, [form])
 
-  const clearSelectedFile = () => {
+  const clearSelectedFile = useCallback(() => {
     setSelectedFile(null)
     form.setValue("videoFile", undefined)
-    const fileInput = document.getElementById("video-upload") as HTMLInputElement
-    if (fileInput) {
-      fileInput.value = ""
-    }
-  }
+    setUploadProgress(0)
+    setUploadError(null)
+  }, [form])
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsUploading(true)
-
-    // Simulate upload progress
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += 5
-      setUploadProgress(progress)
-
-      if (progress >= 100) {
-        clearInterval(interval)
-        setIsUploading(false)
-        setUploadProgress(0)
-        setSelectedFile(null)
-        form.reset()
-
-        toast({
-          title: "Upload Complete",
-          description: "Your video has been uploaded and is now being processed.",
-        })
-      }
-    }, 300)
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsUploading(true);
+    setUploadError(null);
+    setTimeout(() => {
+      form.reset();
+      clearSelectedFile();
+      setIsUploading(false);
+      setUploadProgress(0);
+      toast({
+        title: "Success",
+        description: "(Mock) Video uploaded successfully and queued for processing",
+      });
+    }, 1000);
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {uploadError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{uploadError}</AlertDescription>
+          </Alert>
+        )}
+        
         <FormField
           control={form.control}
           name="title"
@@ -91,24 +123,8 @@ export function VideoUpload() {
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="Enter a title for your video" {...field} />
+                <Input placeholder="Enter video title" {...field} />
               </FormControl>
-              <FormDescription>A descriptive title for the video footage</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Enter a description (optional)" className="resize-none" {...field} />
-              </FormControl>
-              <FormDescription>Additional details about the video footage</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -121,9 +137,29 @@ export function VideoUpload() {
             <FormItem>
               <FormLabel>Location</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. Main St & 5th Ave" {...field} />
+                <Input placeholder="Enter filming location" {...field} />
               </FormControl>
-              <FormDescription>Where the video was recorded (optional)</FormDescription>
+              <FormDescription>
+                This helps in correlating detected license plates with locations
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description (Optional)</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Add any additional details about the video"
+                  className="resize-none"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -132,72 +168,71 @@ export function VideoUpload() {
         <FormField
           control={form.control}
           name="videoFile"
-          render={() => (
+          render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Video File</FormLabel>
               <FormControl>
-                <div className="grid w-full gap-2">
-                  {!selectedFile ? (
-                    <div className="flex flex-col items-center justify-center rounded-md border border-dashed p-12">
-                      <Upload className="h-8 w-8 text-muted-foreground mb-4" />
-                      <div className="text-center">
-                        <p className="text-sm font-medium mb-1">Drag and drop your video file here</p>
-                        <p className="text-xs text-muted-foreground mb-4">MP4, AVI, MOV, or MKV up to 500MB</p>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          onClick={() => document.getElementById("video-upload")?.click()}
-                        >
-                          Select File
-                        </Button>
-                        <Input
-                          id="video-upload"
-                          type="file"
-                          accept="video/*"
-                          className="hidden"
-                          onChange={handleFileChange}
-                        />
+                <div className="grid gap-4">
+                  <Input
+                    type="file"
+                    accept=".mp4,.mov,.avi,.mkv"
+                    onChange={handleFileChange}
+                    disabled={isUploading}
+                    {...field}
+                  />
+                  {selectedFile && (
+                    <div className="flex items-center justify-between gap-4 p-4 rounded-lg border">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{selectedFile.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                        </p>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between rounded-md border p-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="bg-secondary rounded-md p-2">
-                          <video className="h-10 w-10" />
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">{selectedFile.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
-                          </p>
-                        </div>
-                      </div>
-                      <Button type="button" variant="ghost" size="icon" onClick={clearSelectedFile}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={clearSelectedFile}
+                        disabled={isUploading}
+                      >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   )}
                 </div>
               </FormControl>
-              <FormDescription>Upload a video file for license plate detection</FormDescription>
+              <FormDescription>
+                Maximum file size: 500MB. Supported formats: MP4, MOV, AVI, MKV
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {isUploading && (
+        {(isUploading || uploadProgress > 0) && (
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Uploading...</span>
-              <span>{uploadProgress}%</span>
-            </div>
-            <Progress value={uploadProgress} />
+            <Progress value={uploadProgress} className="h-2" />
+            <p className="text-sm text-muted-foreground">
+              {uploadProgress === 100 ? "Processing..." : `Uploading: ${uploadProgress}%`}
+            </p>
           </div>
         )}
 
-        <Button type="submit" disabled={isUploading}>
-          {isUploading ? "Uploading..." : "Upload Video"}
-        </Button>
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isUploading}>
+            {isUploading ? (
+              <>
+                <Upload className="mr-2 h-4 w-4 animate-pulse" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                Upload Video
+              </>
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   )

@@ -1,6 +1,18 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
+import * as L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import { format } from "date-fns"
+
+interface MapMarker {
+  id: string
+  plateNumber: string
+  lat: number
+  lng: number
+  timestamp: Date
+}
 
 // Mock data for map markers
 const mapMarkers = [
@@ -14,122 +26,107 @@ const mapMarkers = [
   { id: "8", plateNumber: "GHI789", lat: 40.7728, lng: -74.046, timestamp: new Date(2023, 4, 5, 10, 15) },
 ]
 
-export function MapView() {
-  const mapRef = useRef<HTMLDivElement>(null)
+// Custom marker icon
+const icon = new L.Icon({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
 
+// Group markers by plate number
+const groupMarkersByPlate = (markers: MapMarker[]) => {
+  return markers.reduce((groups, marker) => {
+    const group = groups[marker.plateNumber] || [];
+    groups[marker.plateNumber] = [...group, marker].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    return groups;
+  }, {} as Record<string, MapMarker[]>);
+};
+
+interface MapViewProps {
+  selectedPlate?: string;
+  showPaths?: boolean;
+  showMarkers?: boolean;
+  currentDate?: Date;
+  clusterMarkers?: boolean;
+}
+
+export function MapView({ 
+  selectedPlate,
+  showPaths = true,
+  showMarkers = true,
+  currentDate,
+  clusterMarkers = false
+}: MapViewProps) {
+  const [map, setMap] = useState<L.Map | null>(null);
+  const markerGroups = groupMarkersByPlate(mapMarkers);
+  
+  // Filter markers based on selected plate and date
+  const filteredMarkers = mapMarkers.filter(marker => {
+    const matchesPlate = !selectedPlate || marker.plateNumber === selectedPlate;
+    const matchesDate = !currentDate || marker.timestamp <= currentDate;
+    return matchesPlate && matchesDate;
+  });
+
+  // Calculate center and bounds
   useEffect(() => {
-    // This is a placeholder for a real map implementation
-    // In a real application, you would use a library like Mapbox, Google Maps, or Leaflet
-    if (mapRef.current) {
-      const canvas = document.createElement("canvas")
-      canvas.width = mapRef.current.clientWidth
-      canvas.height = mapRef.current.clientHeight
-      mapRef.current.appendChild(canvas)
-
-      const ctx = canvas.getContext("2d")
-      if (ctx) {
-        // Draw a simple map background
-        ctx.fillStyle = "#f0f0f0"
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-        // Draw some grid lines
-        ctx.strokeStyle = "#ddd"
-        ctx.lineWidth = 1
-        for (let i = 0; i < canvas.width; i += 40) {
-          ctx.beginPath()
-          ctx.moveTo(i, 0)
-          ctx.lineTo(i, canvas.height)
-          ctx.stroke()
-        }
-        for (let i = 0; i < canvas.height; i += 40) {
-          ctx.beginPath()
-          ctx.moveTo(0, i)
-          ctx.lineTo(canvas.width, i)
-          ctx.stroke()
-        }
-
-        // Group markers by plate number
-        const plateGroups: Record<string, typeof mapMarkers> = {}
-        mapMarkers.forEach((marker) => {
-          if (!plateGroups[marker.plateNumber]) {
-            plateGroups[marker.plateNumber] = []
-          }
-          plateGroups[marker.plateNumber].push(marker)
-        })
-
-        // Draw paths for each plate number
-        Object.entries(plateGroups).forEach(([plateNumber, markers]) => {
-          // Sort markers by timestamp
-          markers.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
-
-          // Assign a color based on the plate number
-          const colorHash = plateNumber.split("").reduce((acc, char) => {
-            return char.charCodeAt(0) + ((acc << 5) - acc)
-          }, 0)
-          const color = `hsl(${Math.abs(colorHash) % 360}, 70%, 50%)`
-
-          // Draw path
-          if (markers.length > 1) {
-            ctx.beginPath()
-            markers.forEach((marker, index) => {
-              // Convert lat/lng to x/y (simplified for demonstration)
-              const x = ((marker.lng + 74.006) * 1000) % canvas.width
-              const y = ((40.7128 - marker.lat) * 1000) % canvas.height
-
-              if (index === 0) {
-                ctx.moveTo(x, y)
-              } else {
-                ctx.lineTo(x, y)
-              }
-            })
-            ctx.strokeStyle = color
-            ctx.lineWidth = 2
-            ctx.stroke()
-          }
-
-          // Draw markers
-          markers.forEach((marker, index) => {
-            // Convert lat/lng to x/y (simplified for demonstration)
-            const x = ((marker.lng + 74.006) * 1000) % canvas.width
-            const y = ((40.7128 - marker.lat) * 1000) % canvas.height
-
-            // Draw marker
-            ctx.beginPath()
-            ctx.arc(x, y, 8, 0, 2 * Math.PI)
-            ctx.fillStyle = color
-            ctx.fill()
-            ctx.strokeStyle = "#fff"
-            ctx.lineWidth = 2
-            ctx.stroke()
-
-            // Add label for first and last marker
-            if (index === 0 || index === markers.length - 1) {
-              ctx.fillStyle = "#333"
-              ctx.font = "12px Arial"
-              ctx.fillText(marker.plateNumber, x + 12, y + 4)
-            }
-          })
-        })
-
-        // Add a note that this is a placeholder
-        ctx.fillStyle = "#666"
-        ctx.font = "14px Arial"
-        ctx.fillText("Map Placeholder - Integrate with real map service", 20, 30)
-      }
-
-      return () => {
-        if (mapRef.current && canvas.parentNode === mapRef.current) {
-          mapRef.current.removeChild(canvas)
-        }
-      }
+    if (map && filteredMarkers.length > 0) {
+      const bounds = L.latLngBounds(filteredMarkers.map(m => [m.lat, m.lng]));
+      map.fitBounds(bounds, { padding: [50, 50] });
     }
-  }, [])
+  }, [map, filteredMarkers]);
 
   return (
-    <div
-      ref={mapRef}
-      className="h-[600px] w-full rounded-md border"
-      aria-label="Map showing vehicle sightings and movement patterns"
-    ></div>
+    <div className="h-[600px] w-full rounded-lg overflow-hidden">
+      <MapContainer
+        center={[40.7128, -74.006]} // Default to NYC coordinates
+        zoom={12}
+        style={{ height: "100%", width: "100%" }}
+        ref={setMap}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        
+        {Object.entries(markerGroups).map(([plateNumber, markers]) => {
+          if (selectedPlate && plateNumber !== selectedPlate) return null;
+          
+          const filteredGroupMarkers = markers.filter(m => !currentDate || m.timestamp <= currentDate);
+          
+          return (
+            <div key={plateNumber}>
+              {showPaths && (
+                <Polyline
+                  positions={filteredGroupMarkers.map(m => [m.lat, m.lng])}
+                  color={`hsl(${(plateNumber.charCodeAt(0) * 100) % 360}, 70%, 50%)`}
+                  weight={3}
+                  opacity={0.6}
+                />
+              )}
+              {showMarkers && filteredGroupMarkers.map(marker => (
+                <Marker
+                  key={marker.id}
+                  position={[marker.lat, marker.lng]}
+                  icon={icon}
+                >
+                  <Popup>
+                    <div className="p-2">
+                      <p className="font-semibold">{marker.plateNumber}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(marker.timestamp, "PPp")}
+                      </p>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </div>
+          );
+        })}
+      </MapContainer>
+    </div>
   )
 }

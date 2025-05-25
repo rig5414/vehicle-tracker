@@ -1,20 +1,31 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
-import { Eye, MoreHorizontal, Play, Trash } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useToast } from "@/components/ui/use-toast"
+import { Download, MoreVertical, Trash2, AlertCircle, CheckCircle, Clock, Loader2, RefreshCcw } from "lucide-react"
+import Image from "next/image"
 
 interface Video {
   id: string
@@ -27,187 +38,265 @@ interface Video {
   plateCount: number
 }
 
-// Mock data for videos
-const mockVideos: Video[] = [
-  {
-    id: "1",
-    title: "Downtown Traffic Cam",
-    description: "Traffic footage from downtown intersection",
-    location: "Main St & 5th Ave",
-    status: "COMPLETED",
-    createdAt: new Date(2023, 4, 15),
-    thumbnailUrl: "/placeholder.svg?height=200&width=300",
-    plateCount: 42,
-  },
-  {
-    id: "2",
-    title: "Highway Surveillance",
-    description: "Highway surveillance footage",
-    location: "I-95 Mile Marker 42",
-    status: "COMPLETED",
-    createdAt: new Date(2023, 4, 14),
-    thumbnailUrl: "/placeholder.svg?height=200&width=300",
-    plateCount: 78,
-  },
-  {
-    id: "3",
-    title: "Parking Lot Camera",
-    description: "Shopping mall parking lot",
-    location: "Westfield Mall",
-    status: "PROCESSING",
-    createdAt: new Date(2023, 4, 13),
-    thumbnailUrl: "/placeholder.svg?height=200&width=300",
-    plateCount: 0,
-  },
-  {
-    id: "4",
-    title: "School Zone Camera",
-    description: "School zone traffic monitoring",
-    location: "Lincoln Elementary School",
-    status: "PENDING",
-    createdAt: new Date(2023, 4, 12),
-    thumbnailUrl: "/placeholder.svg?height=200&width=300",
-    plateCount: 0,
-  },
-  {
-    id: "5",
-    title: "Gas Station Entrance",
-    description: "Gas station entrance and exit",
-    location: "QuikFill Gas Station",
-    status: "FAILED",
-    createdAt: new Date(2023, 4, 11),
-    thumbnailUrl: "/placeholder.svg?height=200&width=300",
-    plateCount: 0,
-  },
-]
+function VideoCardSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <div className="aspect-video relative bg-muted">
+        <div className="absolute top-2 right-2">
+          <Skeleton className="h-6 w-24" />
+        </div>
+      </div>
+      <div className="p-4 space-y-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+        <Skeleton className="h-4 w-full" />
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+      </div>
+    </Card>
+  )
+}
 
 export function VideoList() {
-  const [videos] = useState<Video[]>(mockVideos)
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  // Mock data for videos
+  const [videos, setVideos] = useState<Video[]>([
+    {
+      id: '1',
+      title: 'Sample Video 1',
+      description: 'A test video',
+      location: 'Test Location',
+      status: 'COMPLETED',
+      createdAt: new Date(),
+      thumbnailUrl: 'https://placehold.co/320x180',
+      plateCount: 3,
+    },
+    {
+      id: '2',
+      title: 'Sample Video 2',
+      description: 'Another test video',
+      location: 'Another Location',
+      status: 'PROCESSING',
+      createdAt: new Date(),
+      thumbnailUrl: 'https://placehold.co/320x180',
+      plateCount: 0,
+    },
+  ]);
+  const [deleteVideoId, setDeleteVideoId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const { toast } = useToast()
 
-  const getStatusColor = (status: Video["status"]) => {
+  const handleDownload = async (videoId: string) => {
+    toast({
+      title: 'Mock Download',
+      description: `Pretending to download video ${videoId}`,
+    });
+  };
+
+  const handleDelete = async () => {
+    if (!deleteVideoId) return;
+    setVideos(prevVideos => prevVideos.filter(video => video.id !== deleteVideoId));
+    toast({
+      title: 'Mock Delete',
+      description: 'Pretending to delete video',
+    });
+    setDeleteVideoId(null);
+  };
+
+  const getStatusIcon = (status: Video["status"]) => {
     switch (status) {
       case "COMPLETED":
-        return "bg-green-500"
+        return <CheckCircle className="h-4 w-4 text-green-500" />
       case "PROCESSING":
-        return "bg-blue-500"
+        return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
       case "PENDING":
-        return "bg-yellow-500"
+        return <Clock className="h-4 w-4 text-yellow-500" />
       case "FAILED":
-        return "bg-red-500"
+        return <AlertCircle className="h-4 w-4 text-red-500" />
       default:
-        return "bg-gray-500"
+        return null
     }
   }
 
+  const getStatusBadge = (status: Video["status"]) => {
+    switch (status) {
+      case "COMPLETED":
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            Completed
+          </Badge>
+        )
+      case "PROCESSING":
+        return (
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            Processing
+          </Badge>
+        )
+      case "PENDING":
+        return (
+          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+            Pending
+          </Badge>
+        )
+      case "FAILED":
+        return (
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            Failed
+          </Badge>
+        )
+      default:
+        return null
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[...Array(6)].map((_, i) => (
+          <VideoCardSkeleton key={i} />
+        ))}
+      </div>
+    )
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {videos.map((video) => (
-        <Card key={video.id} className="overflow-hidden">
-          <div className="aspect-video relative">
-            <img
-              src={video.thumbnailUrl || "/placeholder.svg"}
-              alt={video.title}
-              className="object-cover w-full h-full"
-            />
-            <div className="absolute top-2 right-2">
-              <Badge variant="secondary" className="font-medium">
-                <div className={`h-2 w-2 rounded-full ${getStatusColor(video.status)} mr-1.5`} />
-                {video.status}
-              </Badge>
-            </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold tracking-tight">My Videos</h2>
+          <p className="text-sm text-muted-foreground">
+            Manage your uploaded videos and view processing status
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {}}
+          disabled={isRefreshing}
+        >
+          <RefreshCcw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
+      </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>{error}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {}}
+            >
+              Try Again
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {videos.length === 0 ? (
+          <div className="col-span-full text-center text-muted-foreground">
+            No videos uploaded yet.
           </div>
-          <CardHeader className="p-4">
-            <div className="flex justify-between items-start">
-              <CardTitle className="text-lg">{video.title}</CardTitle>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Details
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Play className="h-4 w-4 mr-2" />
-                    Play Video
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive">
-                    <Trash className="h-4 w-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <CardDescription className="line-clamp-2">{video.description || "No description provided"}</CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-sm text-muted-foreground">
-              <div>Location: {video.location || "Unknown"}</div>
-              <div>Uploaded: {format(video.createdAt, "PPP")}</div>
-              {video.status === "COMPLETED" && <div>Plates Detected: {video.plateCount}</div>}
-            </div>
-          </CardContent>
-          <CardFooter className="p-4 pt-0">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="w-full" onClick={() => setSelectedVideo(video)}>
-                  View Details
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Video Details</DialogTitle>
-                </DialogHeader>
-                {selectedVideo && (
-                  <div className="space-y-4">
-                    <div className="aspect-video overflow-hidden rounded-md">
-                      <img
-                        src={selectedVideo.thumbnailUrl || "/placeholder.svg"}
-                        alt={selectedVideo.title}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-bold">{selectedVideo.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedVideo.description || "No description provided"}
-                      </p>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <h4 className="font-medium">Status</h4>
-                          <Badge variant="secondary">
-                            <div className={`h-2 w-2 rounded-full ${getStatusColor(selectedVideo.status)} mr-1.5`} />
-                            {selectedVideo.status}
-                          </Badge>
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Upload Date</h4>
-                          <p>{format(selectedVideo.createdAt, "PPP")}</p>
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Location</h4>
-                          <p>{selectedVideo.location || "Unknown"}</p>
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Plates Detected</h4>
-                          <p>{selectedVideo.status === "COMPLETED" ? selectedVideo.plateCount : "N/A"}</p>
-                        </div>
-                      </div>
-                    </div>
+        ) : (
+          videos.map((video) => (
+            <Card key={video.id} className="overflow-hidden">
+              <div className="aspect-video relative">
+                <Image
+                  src={video.thumbnailUrl}
+                  alt={video.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+                <div className="absolute top-2 right-2">
+                  {getStatusBadge(video.status)}
+                </div>
+              </div>
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-semibold">{video.title}</h3>
+                    {video.location && (
+                      <p className="text-sm text-muted-foreground">{video.location}</p>
+                    )}
                   </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleDownload(video.id)}>
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => setDeleteVideoId(video.id)}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                {video.description && (
+                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                    {video.description}
+                  </p>
                 )}
-              </DialogContent>
-            </Dialog>
-          </CardFooter>
-        </Card>
-      ))}
+                <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(video.status)}
+                    <span>
+                      {video.status === "COMPLETED"
+                        ? `${video.plateCount} plates detected`
+                        : video.status === "FAILED"
+                        ? "Processing failed"
+                        : video.status === "PROCESSING"
+                        ? "Processing video"
+                        : "Queued for processing"}
+                    </span>
+                  </div>
+                  <time dateTime={video.createdAt.toISOString()}>
+                    {new Date(video.createdAt).toLocaleDateString()}
+                  </time>
+                </div>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
+
+      <AlertDialog open={!!deleteVideoId} onOpenChange={() => setDeleteVideoId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The video and all its detected license plates will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

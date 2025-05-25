@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Eye, Map } from "lucide-react"
 import { format } from "date-fns"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { LocationMapDialog } from "./location-map-dialog"
 
 interface Sighting {
   id: string
@@ -64,11 +65,18 @@ const mockSightings: Sighting[] = [
 export function SearchResults() {
   const [sightings] = useState<Sighting[]>(mockSightings)
   const [selectedSighting, setSelectedSighting] = useState<Sighting | null>(null)
+  const [isMapOpen, setIsMapOpen] = useState(false)
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.95) return "bg-green-500"
     if (confidence >= 0.85) return "bg-yellow-500"
     return "bg-red-500"
+  }
+
+  // Get historical sightings for the selected plate number
+  const getSightingsHistory = (plateNumber: string) => {
+    return sightings.filter(s => s.plateNumber === plateNumber)
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
   return (
@@ -111,7 +119,7 @@ export function SearchResults() {
                           View
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
+                      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Plate Sighting Details</DialogTitle>
                         </DialogHeader>
@@ -146,7 +154,14 @@ export function SearchResults() {
                         )}
                       </DialogContent>
                     </Dialog>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedSighting(sighting);
+                        setIsMapOpen(true);
+                      }}
+                    >
                       <Map className="h-4 w-4 mr-1" />
                       Map
                     </Button>
@@ -157,6 +172,19 @@ export function SearchResults() {
           )}
         </TableBody>
       </Table>
+
+      {/* Map Dialog */}
+      {selectedSighting && (
+        <LocationMapDialog
+          isOpen={isMapOpen}
+          onClose={() => {
+            setIsMapOpen(false);
+            setSelectedSighting(null);
+          }}
+          sighting={selectedSighting}
+          sightingsHistory={getSightingsHistory(selectedSighting.plateNumber)}
+        />
+      )}
     </div>
   )
 }
