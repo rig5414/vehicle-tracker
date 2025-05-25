@@ -1,7 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { MapView } from "@/components/map/map-view"
-import { MapControls } from "@/components/map/map-controls"
-import { MapTimeline } from "@/components/map/map-timeline"
+import dynamic from "next/dynamic"
+
+const MapView = dynamic(() => import("@/components/map/map-view"), { ssr: false })
+const MapControls = dynamic(() => import("@/components/map/map-controls"), { ssr: false })
+const MapTimeline = dynamic(() => import("@/components/map/map-timeline"), { ssr: false })
 
 export default function MapPage() {
   return (
