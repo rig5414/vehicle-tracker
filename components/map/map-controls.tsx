@@ -44,9 +44,9 @@ export function MapControls() {
             <FormItem>
               <FormLabel>License Plate</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. ABC123" {...field} />
+                <Input placeholder="e.g. KAA 123A" {...field} />
               </FormControl>
-              <FormDescription>Filter by license plate (optional)</FormDescription>
+              <FormDescription>Filter by Kenyan license plate (optional)</FormDescription>
             </FormItem>
           )}
         />

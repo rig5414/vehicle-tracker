@@ -39,13 +39,26 @@ const icon = new L.Icon({
 
 // Mock geocoding function - replace with actual geocoding service
 const geocodeLocation = async (location: string): Promise<[number, number]> => {
-  // This should be replaced with actual geocoding service
-  // For now, returning random coordinates around London
-  const baseCoords: [number, number] = [51.505, -0.09];
-  return [
-    baseCoords[0] + (Math.random() - 0.5) * 0.02,
-    baseCoords[1] + (Math.random() - 0.5) * 0.02
-  ];
+  // Kenyan locations for demonstration
+  const locations: Record<string, [number, number]> = {
+    'Nairobi': [-1.286389, 36.817223],
+    'Mombasa': [-4.043477, 39.668206],
+    'Kisumu': [-0.091702, 34.768016],
+    'Eldoret': [0.514277, 35.269779],
+    'Thika': [-1.0334, 37.0693],
+    'Nakuru': [-0.303099, 36.080025],
+    'Moi Avenue, Nairobi': [-1.28333, 36.81667],
+    'Mombasa Road, Nairobi': [-1.3200, 36.8500],
+    'Main Market, Kisumu': [-0.102206, 34.761711],
+    'Thika Superhighway, Nairobi': [-1.2000, 36.9000],
+  };
+  for (const key in locations) {
+    if (location.includes(key)) {
+      return locations[key];
+    }
+  }
+  // Default to Nairobi
+  return [-1.286389, 36.817223];
 };
 
 export function LocationMapDialog({ isOpen, onClose, sighting, sightingsHistory }: LocationMapDialogProps) {

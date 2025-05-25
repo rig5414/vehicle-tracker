@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -15,7 +16,7 @@ const formSchema = z.object({
     message: "License plate must be at least 2 characters.",
   }),
   location: z.string().optional(),
-  timeRange: z.string().default("all"),
+  timeRange: z.string(),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
 })
@@ -29,10 +30,12 @@ export function SearchForm() {
       plateNumber: "",
       location: "",
       timeRange: "all",
+      startDate: undefined,
+      endDate: undefined,
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>): void {
     console.log(values)
     // In a real application, this would trigger a search
   }
@@ -48,7 +51,7 @@ export function SearchForm() {
               <FormItem>
                 <FormLabel>License Plate</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. ABC123" {...field} />
+                  <Input placeholder="e.g. KAA123" {...field} />
                 </FormControl>
                 <FormDescription>Enter the full or partial license plate number</FormDescription>
                 <FormMessage />
@@ -63,7 +66,7 @@ export function SearchForm() {
               <FormItem>
                 <FormLabel>Location</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. Main St & 5th Ave" {...field} />
+                  <Input placeholder="e.g. Moi Avenue, Nairobi" {...field} />
                 </FormControl>
                 <FormDescription>Filter by location (optional)</FormDescription>
                 <FormMessage />

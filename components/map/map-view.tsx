@@ -16,14 +16,14 @@ interface MapMarker {
 
 // Mock data for map markers
 const mapMarkers = [
-  { id: "1", plateNumber: "ABC123", lat: 40.7128, lng: -74.006, timestamp: new Date(2023, 4, 15, 14, 30) },
-  { id: "2", plateNumber: "ABC123", lat: 40.7328, lng: -73.986, timestamp: new Date(2023, 4, 14, 9, 15) },
-  { id: "3", plateNumber: "ABC123", lat: 40.7228, lng: -74.026, timestamp: new Date(2023, 4, 12, 17, 45) },
-  { id: "4", plateNumber: "XYZ789", lat: 40.7028, lng: -74.016, timestamp: new Date(2023, 4, 10, 11, 20) },
-  { id: "5", plateNumber: "XYZ789", lat: 40.7428, lng: -73.996, timestamp: new Date(2023, 4, 8, 8, 10) },
-  { id: "6", plateNumber: "DEF456", lat: 40.7528, lng: -74.026, timestamp: new Date(2023, 4, 7, 16, 45) },
-  { id: "7", plateNumber: "DEF456", lat: 40.7628, lng: -74.036, timestamp: new Date(2023, 4, 6, 12, 30) },
-  { id: "8", plateNumber: "GHI789", lat: 40.7728, lng: -74.046, timestamp: new Date(2023, 4, 5, 10, 15) },
+  { id: "1", plateNumber: "KAA 123A", lat: -1.286389, lng: 36.817223, timestamp: new Date(2023, 4, 15, 14, 30) }, // Nairobi
+  { id: "2", plateNumber: "KAA 123A", lat: -1.292066, lng: 36.821945, timestamp: new Date(2023, 4, 14, 9, 15) }, // Nairobi
+  { id: "3", plateNumber: "KAA 123A", lat: -1.300000, lng: 36.800000, timestamp: new Date(2023, 4, 12, 17, 45) }, // Nairobi
+  { id: "4", plateNumber: "KBC 456B", lat: -4.043477, lng: 39.668206, timestamp: new Date(2023, 4, 10, 11, 20) }, // Mombasa
+  { id: "5", plateNumber: "KBC 456B", lat: -4.051056, lng: 39.666443, timestamp: new Date(2023, 4, 8, 8, 10) }, // Mombasa
+  { id: "6", plateNumber: "KDA 789C", lat: -0.091702, lng: 34.768016, timestamp: new Date(2023, 4, 7, 16, 45) }, // Kisumu
+  { id: "7", plateNumber: "KDA 789C", lat: -0.102206, lng: 34.761711, timestamp: new Date(2023, 4, 6, 12, 30) }, // Kisumu
+  { id: "8", plateNumber: "KCE 234D", lat: 0.514277, lng: 35.269779, timestamp: new Date(2023, 4, 5, 10, 15) }, // Eldoret
 ]
 
 // Custom marker icon
@@ -82,7 +82,7 @@ export function MapView({
   return (
     <div className="h-[600px] w-full rounded-lg overflow-hidden">
       <MapContainer
-        center={[40.7128, -74.006]} // Default to NYC coordinates
+        center={[-1.286389, 36.817223]} // Nairobi, Kenya
         zoom={12}
         style={{ height: "100%", width: "100%" }}
         ref={setMap}

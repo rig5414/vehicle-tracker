@@ -22,41 +22,41 @@ interface Sighting {
 const mockSightings: Sighting[] = [
   {
     id: "1",
-    plateNumber: "ABC123",
+    plateNumber: "KAA 123A",
     timestamp: new Date(2023, 4, 15, 14, 30),
-    location: "Main St & 5th Ave",
+    location: "Nairobi, Moi Avenue",
     confidence: 0.98,
     imageUrl: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "2",
-    plateNumber: "ABC123",
+    plateNumber: "KAA 123A",
     timestamp: new Date(2023, 4, 14, 9, 15),
-    location: "Park Rd & Oak St",
+    location: "Nairobi, Kenyatta Avenue",
     confidence: 0.95,
     imageUrl: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "3",
-    plateNumber: "ABC123",
+    plateNumber: "KBC 456B",
     timestamp: new Date(2023, 4, 12, 17, 45),
-    location: "River Blvd & Pine Ave",
+    location: "Mombasa, Moi Avenue",
     confidence: 0.92,
     imageUrl: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "4",
-    plateNumber: "ABC123",
+    plateNumber: "KDA 789C",
     timestamp: new Date(2023, 4, 10, 11, 20),
-    location: "Mountain View & Lake Rd",
+    location: "Kisumu, Main Market",
     confidence: 0.89,
     imageUrl: "/placeholder.svg?height=200&width=300",
   },
   {
     id: "5",
-    plateNumber: "ABC123",
+    plateNumber: "KCE 234D",
     timestamp: new Date(2023, 4, 8, 8, 10),
-    location: "Sunset Dr & Beach Ave",
+    location: "Eldoret, Uganda Road",
     confidence: 0.87,
     imageUrl: "/placeholder.svg?height=200&width=300",
   },
@@ -67,14 +67,14 @@ export function SearchResults() {
   const [selectedSighting, setSelectedSighting] = useState<Sighting | null>(null)
   const [isMapOpen, setIsMapOpen] = useState(false)
 
-  const getConfidenceColor = (confidence: number) => {
+  const getConfidenceColor = (confidence: number): string => {
     if (confidence >= 0.95) return "bg-green-500"
     if (confidence >= 0.85) return "bg-yellow-500"
     return "bg-red-500"
   }
 
   // Get historical sightings for the selected plate number
-  const getSightingsHistory = (plateNumber: string) => {
+  const getSightingsHistory = (plateNumber: string): Sighting[] => {
     return sightings.filter(s => s.plateNumber === plateNumber)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
@@ -127,7 +127,7 @@ export function SearchResults() {
                           <div className="space-y-4">
                             <div className="aspect-video overflow-hidden rounded-md">
                               <img
-                                src={selectedSighting.imageUrl || "/placeholder.svg"}
+                                src={selectedSighting.imageUrl ?? "/placeholder.svg"}
                                 alt={`License plate ${selectedSighting.plateNumber}`}
                                 className="object-cover w-full h-full"
                               />

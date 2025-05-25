@@ -14,9 +14,9 @@ interface Sighting {
 }
 
 const sampleSightings: Sighting[] = [
-  { id: 1, lat: 51.505, lng: -0.09, plate: "ABC123", timestamp: "2024-03-23 10:00" },
-  { id: 2, lat: 51.51, lng: -0.1, plate: "XYZ789", timestamp: "2024-03-23 10:15" },
-  { id: 3, lat: 51.515, lng: -0.095, plate: "DEF456", timestamp: "2024-03-23 10:30" },
+  { id: 1, lat: -1.286389, lng: 36.817223, plate: "KAA 123A", timestamp: "2024-03-23 10:00" },
+  { id: 2, lat: -4.043477, lng: 39.668206, plate: "KBC 456B", timestamp: "2024-03-23 10:15" },
+  { id: 3, lat: -0.091702, lng: 34.768016, plate: "KDA 789C", timestamp: "2024-03-23 10:30" },
 ];
 
 // Define the icon outside the component to prevent recreation
@@ -47,7 +47,7 @@ export default function LeafletMap() {
     <div id="map" className="h-[400px] w-full rounded-lg overflow-hidden">
       <MapContainer
         ref={mapRef}
-        center={[51.505, -0.09]}
+        center={[-1.286389, 36.817223]}
         zoom={13}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={false}

@@ -123,7 +123,7 @@ export function VideoUpload() {
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="Enter video title" {...field} />
+                <Input placeholder="e.g. Nairobi CBD Traffic" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -137,10 +137,10 @@ export function VideoUpload() {
             <FormItem>
               <FormLabel>Location</FormLabel>
               <FormControl>
-                <Input placeholder="Enter filming location" {...field} />
+                <Input placeholder="e.g. Moi Avenue, Nairobi" {...field} />
               </FormControl>
               <FormDescription>
-                This helps in correlating detected license plates with locations
+                This helps in correlating detected license plates with Kenyan locations
               </FormDescription>
               <FormMessage />
             </FormItem>

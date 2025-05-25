@@ -9,27 +9,27 @@ interface PlateMetric {
 // Mock data for plate metrics
 const plateMetrics: PlateMetric[] = [
   {
-    plateNumber: "ABC123",
+    plateNumber: "KAA 123A",
     count: 42,
     percentage: 100,
   },
   {
-    plateNumber: "XYZ789",
+    plateNumber: "KBC 456B",
     count: 36,
     percentage: 85.7,
   },
   {
-    plateNumber: "DEF456",
+    plateNumber: "KDA 789C",
     count: 28,
     percentage: 66.7,
   },
   {
-    plateNumber: "GHI789",
+    plateNumber: "KCE 234D",
     count: 21,
     percentage: 50,
   },
   {
-    plateNumber: "JKL012",
+    plateNumber: "KDF 567E",
     count: 14,
     percentage: 33.3,
   },

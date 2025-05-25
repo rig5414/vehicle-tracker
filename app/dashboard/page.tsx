@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { RecentSightings } from "@/components/dashboard/recent-sightings"
 import { PlateMetrics } from "@/components/dashboard/plate-metrics"
-import { SightingsChart } from "@/components/dashboard/sightings-chart"
+import { SightingsChart, TopPlatesChart, SightingsByHourChart } from "@/components/dashboard/sightings-chart"
 import { SightingsMap } from "@/components/dashboard/sightings-map"
 
 export default function DashboardPage() {
@@ -97,46 +97,51 @@ export default function DashboardPage() {
             </div>
           </TabsContent>
           <TabsContent value="analytics" className="space-y-4">
-            <div className="grid gap-4">
-              <Card className="col-span-full">
+            <div className="grid gap-4 gap-y-8 lg:grid-cols-3">
+              <Card>
                 <CardHeader>
-                  <CardTitle>Advanced Analytics</CardTitle>
-                  <CardDescription>Detailed analysis of vehicle sightings and patterns</CardDescription>
+                  <CardTitle>Top Plates (Kenya)</CardTitle>
+                  <CardDescription>Most frequently sighted Kenyan plates</CardDescription>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {/* Analytics cards */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Pattern Analysis</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="h-[300px] flex items-center justify-center border rounded-md">
-                          <p className="text-muted-foreground">Pattern analysis visualization</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Time Distribution</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="h-[300px] flex items-center justify-center border rounded-md">
-                          <p className="text-muted-foreground">Time-based distribution chart</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Location Clusters</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="h-[300px] flex items-center justify-center border rounded-md">
-                          <p className="text-muted-foreground">Location cluster analysis</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                <CardContent>
+                  <ul className="space-y-2">
+                    <li className="flex justify-between"><span>KAA 123A</span><span className="font-bold">42</span></li>
+                    <li className="flex justify-between"><span>KBC 456B</span><span className="font-bold">36</span></li>
+                    <li className="flex justify-between"><span>KDA 789C</span><span className="font-bold">28</span></li>
+                    <li className="flex justify-between"><span>KCE 234D</span><span className="font-bold">21</span></li>
+                    <li className="flex justify-between"><span>KDF 567E</span><span className="font-bold">14</span></li>
+                  </ul>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sightings by Hour</CardTitle>
+                  <CardDescription>Distribution of sightings by hour of day (Kenyan time)</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    <li className="flex justify-between"><span>07:00</span><span className="font-bold">82</span></li>
+                    <li className="flex justify-between"><span>08:00</span><span className="font-bold">76</span></li>
+                    <li className="flex justify-between"><span>09:00</span><span className="font-bold">65</span></li>
+                    <li className="flex justify-between"><span>17:00</span><span className="font-bold">71</span></li>
+                    <li className="flex justify-between"><span>18:00</span><span className="font-bold">68</span></li>
+                    <li className="flex justify-between"><span>Other hours</span><span className="font-bold">30-50</span></li>
+                  </ul>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Locations</CardTitle>
+                  <CardDescription>Most common sighting locations in Kenya</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    <li className="flex justify-between"><span>Nairobi, Moi Avenue</span><span className="font-bold">52</span></li>
+                    <li className="flex justify-between"><span>Mombasa, Moi Avenue</span><span className="font-bold">37</span></li>
+                    <li className="flex justify-between"><span>Kisumu, Main Market</span><span className="font-bold">29</span></li>
+                    <li className="flex justify-between"><span>Eldoret, Uganda Road</span><span className="font-bold">18</span></li>
+                    <li className="flex justify-between"><span>Thika, Kenyatta Highway</span><span className="font-bold">12</span></li>
+                  </ul>
                 </CardContent>
               </Card>
             </div>

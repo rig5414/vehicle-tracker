@@ -19,11 +19,11 @@ export async function GET(request: NextRequest) {
       data = [
         {
           id: 1,
-          plateNumber: "ABC123",
+          plateNumber: "KAA 123A",
           timestamp: new Date().toISOString(),
-          location: "Test Location",
-          latitude: 51.505,
-          longitude: -0.09,
+          location: "Nairobi, Moi Avenue",
+          latitude: -1.286389,
+          longitude: 36.817223,
         }
       ];
     }
@@ -49,12 +49,12 @@ export async function POST(request: NextRequest) {
       // Try to save to database
       const plateSighting = await prisma.plateSighting.create({
         data: {
-          plateNumber: body.plateNumber || "TEST123",
+          plateNumber: body.plateNumber || "KAA 123A",
           confidence: body.confidence || 1.0,
           timestamp: body.timestamp || new Date().toISOString(),
-          location: body.location,
-          latitude: body.latitude,
-          longitude: body.longitude,
+          location: body.location || "Nairobi, Moi Avenue",
+          latitude: body.latitude || -1.286389,
+          longitude: body.longitude || 36.817223,
           imageUrl: body.imageUrl,
           videoId: body.videoId || "test-video"
         }
