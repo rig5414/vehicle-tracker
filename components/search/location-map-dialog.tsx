@@ -6,29 +6,22 @@ import { Card, CardContent } from "../ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock } from "lucide-react";
 import dynamic from 'next/dynamic';
-import * as L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
-// Dynamically import react-leaflet components with no SSR
-const Map = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false }
-);
+// Define a constant for the maximum number of historical sightings to process
+const MAX_HISTORY_SIGHTINGS = 50;
 
-const TileLayerComponent = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-
-const MarkerComponent = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Marker),
-  { ssr: false }
-);
-
-const PopupComponent = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Popup),
-  { ssr: false }
-);
+// Dynamically import the entire map component to avoid SSR issues
+const MapComponent = dynamic(() => import('./map-component'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full bg-gray-800 text-white">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+        <p>Loading map...</p>
+      </div>
+    </div>
+  )
+});
 
 interface LocationMapDialogProps {
   isOpen: boolean;
@@ -48,27 +41,6 @@ interface LocationMapDialogProps {
   }>;
 }
 
-// Custom marker icons for current and historical sightings
-const currentIcon = new L.Icon({
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [30, 48],
-  iconAnchor: [15, 48],
-  popupAnchor: [1, -40],
-  shadowSize: [48, 48]
-});
-
-const historyIcon = new L.Icon({
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [20, 32],
-  iconAnchor: [10, 32],
-  popupAnchor: [1, -28],
-  shadowSize: [32, 32]
-});
-
 // Mock geocoding function - replace with actual geocoding service
 const geocodeLocation = async (location: string): Promise<[number, number]> => {
   // Kenyan locations for demonstration
@@ -84,8 +56,9 @@ const geocodeLocation = async (location: string): Promise<[number, number]> => {
     'Main Market, Kisumu': [-0.102206, 34.761711],
     'Thika Superhighway, Nairobi': [-1.2000, 36.9000],
   };
+  
   for (const key in locations) {
-    if (location.includes(key)) {
+    if (location.toLowerCase().includes(key.toLowerCase())) {
       return locations[key];
     }
   }
@@ -95,26 +68,38 @@ const geocodeLocation = async (location: string): Promise<[number, number]> => {
 
 export function LocationMapDialog({ isOpen, onClose, sighting, sightingsHistory }: LocationMapDialogProps) {
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
-  const [allSightingCoords, setAllSightingCoords] = useState<Array<[number, number]>>([]);
-  const [bounds, setBounds] = useState<L.LatLngBounds | null>(null);
+  const [allSightingCoords, setAllSightingCoords] = useState<Array<{ coords: [number, number], sighting: typeof sightingsHistory[0] }>>([]);
   const [selectedSighting, setSelectedSighting] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const loadCoordinates = async () => {
-      if (sighting && sighting.location) {
+      if (!isOpen || !sighting?.location) return;
+      
+      setIsLoading(true);
+      
+      try {
+        // Get coordinates for current sighting
         const coords = await geocodeLocation(sighting.location);
         setCoordinates(coords);
-      }
 
-      // Geocode all historical sightings
-      const coordsPromises = sightingsHistory.map(s => geocodeLocation(s.location));
-      const allCoords = await Promise.all(coordsPromises);
-      setAllSightingCoords(allCoords);
+        // Geocode a limited number of historical sightings (most recent first)
+        const recentSightings = sightingsHistory
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, MAX_HISTORY_SIGHTINGS);
 
-      // Calculate bounds to fit all markers with padding
-      if (allCoords.length > 0) {
-        const bounds = L.latLngBounds(allCoords.map(coord => L.latLng(coord[0], coord[1])));
-        setBounds(bounds.pad(0.1)); // Add 10% padding
+        const coordsWithSightings = await Promise.all(
+          recentSightings.map(async (s) => ({
+            coords: await geocodeLocation(s.location),
+            sighting: s
+          }))
+        );
+        
+        setAllSightingCoords(coordsWithSightings);
+      } catch (error) {
+        console.error('Error loading coordinates:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -124,7 +109,7 @@ export function LocationMapDialog({ isOpen, onClose, sighting, sightingsHistory 
     }
   }, [isOpen, sighting, sightingsHistory]);
 
-  if (!isOpen || !coordinates) return null;
+  if (!isOpen) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -148,53 +133,20 @@ export function LocationMapDialog({ isOpen, onClose, sighting, sightingsHistory 
         <div className="flex flex-1 overflow-hidden">
           {/* Map Container */}
           <div className="flex-1 relative">
-            {coordinates && (
-              <Map
+            {coordinates && !isLoading ? (
+              <MapComponent
                 center={coordinates}
-                zoom={12}
-                className="h-full w-full"
-                bounds={bounds || undefined}
-                style={{ height: '100%', width: '100%' }}
-              >
-                <TileLayerComponent
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                {allSightingCoords.map((coords, index) => {
-                  const isCurrentSighting = sightingsHistory[index].id === sighting.id;
-                  return (
-                    <MarkerComponent
-                      key={sightingsHistory[index].id}
-                      position={coords}
-                      icon={isCurrentSighting ? currentIcon : historyIcon}
-                      eventHandlers={{
-                        click: () => setSelectedSighting(sightingsHistory[index].id),
-                      }}
-                    >
-                      <PopupComponent>
-                        <div className="p-3 min-w-[200px]">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge variant={isCurrentSighting ? "default" : "secondary"}>
-                              {isCurrentSighting ? "Current" : "Historical"}
-                            </Badge>
-                          </div>
-                          <p className="font-semibold text-lg mb-1">
-                            {sightingsHistory[index].plateNumber}
-                          </p>
-                          <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
-                            <MapPin className="h-3 w-3" />
-                            <span>{sightingsHistory[index].location}</span>
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Clock className="h-3 w-3" />
-                            <span>{sightingsHistory[index].timestamp.toLocaleString()}</span>
-                          </div>
-                        </div>
-                      </PopupComponent>
-                    </MarkerComponent>
-                  );
-                })}
-              </Map>
+                sightings={allSightingCoords}
+                currentSightingId={sighting.id}
+                onMarkerClick={setSelectedSighting}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full bg-gray-800 text-white">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                  <p>Loading map...</p>
+                </div>
+              </div>
             )}
           </div>
 
