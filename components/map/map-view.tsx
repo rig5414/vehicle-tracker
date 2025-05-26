@@ -1,10 +1,36 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
-import * as L from 'leaflet'
+import dynamic from 'next/dynamic'
 import 'leaflet/dist/leaflet.css'
 import { format } from "date-fns"
+import L from "leaflet"
+
+// Dynamically import Leaflet components
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+)
+
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+)
+
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+)
+
+const Popup = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Popup),
+  { ssr: false }
+)
+
+const Polyline = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Polyline),
+  { ssr: false }
+)
 
 interface MapMarker {
   id: string

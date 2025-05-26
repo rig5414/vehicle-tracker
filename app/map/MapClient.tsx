@@ -3,9 +3,28 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import dynamic from "next/dynamic";
 
-const MapView = dynamic(() => import("@/components/map/map-view"), { ssr: false });
-const MapControls = dynamic(() => import("@/components/map/map-controls"), { ssr: false });
-const MapTimeline = dynamic(() => import("@/components/map/map-timeline"), { ssr: false });
+// Import map components with noSSR
+const MapView = dynamic(
+  () => import("@/components/map/map-view").then((mod) => mod.default),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[600px] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    )
+  }
+);
+
+const MapControls = dynamic(
+  () => import("@/components/map/map-controls").then((mod) => mod.default),
+  { ssr: false }
+);
+
+const MapTimeline = dynamic(
+  () => import("@/components/map/map-timeline").then((mod) => mod.default),
+  { ssr: false }
+);
 
 export default function MapClient() {
   return (

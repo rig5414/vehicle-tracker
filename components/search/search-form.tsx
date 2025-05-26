@@ -9,7 +9,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/ui/date-picker"
-import { useState } from "react"
+import { useState, createContext, useContext } from "react"
 
 const formSchema = z.object({
   plateNumber: z.string().min(2, {
@@ -21,8 +21,29 @@ const formSchema = z.object({
   endDate: z.date().optional(),
 })
 
+export interface SearchParams {
+  plateNumber: string
+  location?: string
+  timeRange: string
+  startDate?: Date
+  endDate?: Date
+}
+
+export const SearchContext = createContext<{
+  params: SearchParams
+  setParams: (params: SearchParams) => void
+  loading: boolean
+  setLoading: (loading: boolean) => void
+}>({
+  params: { plateNumber: "", location: "", timeRange: "all" },
+  setParams: () => {},
+  loading: false,
+  setLoading: () => {},
+})
+
 export function SearchForm() {
   const [showDateRange, setShowDateRange] = useState(false)
+  const { setParams, setLoading } = useContext(SearchContext)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -36,8 +57,11 @@ export function SearchForm() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>): void {
-    console.log(values)
-    // In a real application, this would trigger a search
+    setLoading(true)
+    setTimeout(() => {
+      setParams(values)
+      setLoading(false)
+    }, 500)
   }
 
   return (
