@@ -1,29 +1,24 @@
-/**
- * This file contains a workaround for Prisma Client initialization on Vercel.
- * It ensures that Prisma Client is properly generated and initialized before use.
- */
-
 import { PrismaClient } from '@prisma/client';
 
-declare global {
-  var prisma: PrismaClient | undefined;
-}
-
-const prismaClientSingleton = () => {
-  try {
-    return new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    });
-  } catch (error) {
-    console.error('Failed to initialize Prisma Client:', error);
-    throw error;
-  }
+const prismaGlobal = global as typeof global & {
+  prisma?: PrismaClient;
 };
 
-const prisma = global.prisma || prismaClientSingleton();
+const prismaClientSingleton = () => new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || 
+           process.env.POSTGRES_PRISMA_URL ||
+           process.env.VERCEL_POSTGRES_PRISMA_URL
+    },
+  },
+});
+
+const prisma = prismaGlobal.prisma ?? prismaClientSingleton();
 
 if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
+  prismaGlobal.prisma = prisma;
 }
 
 export default prisma;

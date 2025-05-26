@@ -16,6 +16,17 @@ const nextConfig = {
     unoptimized: true,
     domains: ['images.unsplash.com'],
   },
+  webpack: (config) => {
+    // Fix for leaflet icons
+    config.module.rules.push({
+      test: /leaflet.+\.png$/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/chunks/[path][name].[hash][ext]',
+      },
+    });
+    return config;
+  },
   experimental: {
     serverActions: {
       allowedOrigins: ['localhost:3000', 'vehicle-tracker.vercel.app']

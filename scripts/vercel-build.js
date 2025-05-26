@@ -17,9 +17,13 @@ function safeRemoveDir(dirPath) {
   }
 }
 
-// Check if DATABASE_URL is set
-if (!process.env.DATABASE_URL) {
-  console.warn('⚠️ No DATABASE_URL found. Skipping database operations...');
+// Check if any database URL is set
+const dbUrl = process.env.DATABASE_URL || 
+              process.env.POSTGRES_PRISMA_URL || 
+              process.env.VERCEL_POSTGRES_PRISMA_URL;
+
+if (!dbUrl) {
+  console.warn('⚠️ No database URL found. Skipping database operations...');
 } else {
   try {
     console.log("🧹 Cleaning up existing Prisma generated files...")
@@ -28,10 +32,16 @@ if (!process.env.DATABASE_URL) {
     console.log('Running prisma generate...');
     execSync('npx prisma generate', { stdio: 'inherit' });
 
-    // Only run migrations in production
-    if (process.env.VERCEL_ENV === 'production') {
+    // Only run migrations in production and if explicitly enabled
+    if (process.env.VERCEL_ENV === 'production' && process.env.RUN_MIGRATIONS === 'true') {
       console.log('Running prisma migrations...');
-      execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+      try {
+        execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+      } catch (migrateError) {
+        console.warn('⚠️ Migration failed, but continuing build:', migrateError.message);
+      }
+    } else {
+      console.log('Skipping migrations in non-production environment or migrations disabled');
     }
   } catch (error) {
     console.error('⚠️ Database operations failed, but continuing build...');

@@ -1,12 +1,33 @@
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { useState, useEffect } from 'react';
-import * as L from 'leaflet';
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "@/components/ui/badge";
+import dynamic from 'next/dynamic';
+import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+// Dynamically import react-leaflet components with no SSR
+const Map = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+
+const TileLayerComponent = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+
+const MarkerComponent = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+);
+
+const PopupComponent = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Popup),
+  { ssr: false }
+);
 
 interface LocationMapDialogProps {
   isOpen: boolean;
@@ -99,72 +120,37 @@ export function LocationMapDialog({ isOpen, onClose, sighting, sightingsHistory 
         <DialogHeader className="pb-2">
           <DialogTitle>Location History for {sighting.plateNumber}</DialogTitle>
         </DialogHeader>
-        <div className="grid lg:grid-cols-3 gap-4 h-[calc(100%-3rem)]">
-          <Card className="lg:col-span-2 h-full">
-            <CardContent className="p-0 h-full">
-              <div className="h-full w-full rounded-lg overflow-hidden">
-                <MapContainer
-                  center={coordinates}
-                  zoom={13}
-                  style={{ height: "100%", width: "100%" }}
-                  bounds={bounds || undefined}
-                  whenReady={() => setMapZoomed(true)}
+        <div className="relative h-full w-full">
+          {coordinates && (
+            <Map
+              center={coordinates}
+              zoom={13}
+              className="h-[calc(95vh-4rem)] w-full rounded-md"
+              bounds={bounds || undefined}
+            >
+              <TileLayerComponent
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              {allSightingCoords.map((coords, index) => (
+                <MarkerComponent
+                  key={sightingsHistory[index].id}
+                  position={coords}
+                  icon={icon}
                 >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  {allSightingCoords.map((coords, index) => (
-                    <Marker 
-                      key={sightingsHistory[index].id}
-                      position={coords}
-                      icon={icon}
-                    >
-                      <Popup>
-                        <div className="text-sm">
-                          <p className="font-semibold">{sightingsHistory[index].location}</p>
-                          <p className="text-muted-foreground">
-                            {sightingsHistory[index].timestamp.toLocaleString()}
-                          </p>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="h-full flex flex-col">
-            <CardContent className="p-4 flex-1 flex flex-col min-h-0">
-              <h3 className="font-semibold mb-4">Recent Sightings Timeline</h3>
-              <div className="overflow-y-auto flex-1 pr-2">
-                {sightingsHistory.map((historySighting, index) => (
-                  <div 
-                    key={historySighting.id}
-                    className="flex items-center justify-between py-2 border-b last:border-0 hover:bg-accent/50 rounded-lg px-2 transition-colors group"
-                  >
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="mt-1 flex flex-col items-center">
-                        <div className="w-2 h-2 rounded-full bg-primary" />
-                        {index !== sightingsHistory.length - 1 && (
-                          <div className="w-0.5 flex-1 bg-border mt-1" />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium truncate">{historySighting.location}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {historySighting.timestamp.toLocaleString()}
-                        </p>
-                      </div>
+                  <PopupComponent>
+                    <div className="p-2">
+                      <p className="font-semibold">{sightingsHistory[index].plateNumber}</p>
+                      <p className="text-sm">{sightingsHistory[index].location}</p>
+                      <p className="text-xs text-gray-600">
+                        {sightingsHistory[index].timestamp.toLocaleString()}
+                      </p>
                     </div>
-                    <Badge variant="outline" className="ml-2 shrink-0">
-                      {index === 0 ? "Latest" : `${index + 1}`}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  </PopupComponent>
+                </MarkerComponent>
+              ))}
+            </Map>
+          )}
         </div>
       </DialogContent>
     </Dialog>

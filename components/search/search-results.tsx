@@ -7,7 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import { Eye, Map } from "lucide-react"
 import { format } from "date-fns"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { LocationMapDialog } from "./location-map-dialog"
+import dynamic from 'next/dynamic'
+
+// Dynamically import the LocationMapDialog with SSR disabled
+const LocationMapDialog = dynamic(
+  () => import('./location-map-dialog').then((mod) => mod.LocationMapDialog),
+  { ssr: false }
+)
 
 interface Sighting {
   id: string
