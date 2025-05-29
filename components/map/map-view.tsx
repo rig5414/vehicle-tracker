@@ -106,7 +106,7 @@ export function MapView({
   }, [map, filteredMarkers]);
 
   return (
-    <div className="h-[600px] w-full rounded-lg overflow-hidden">
+    <div className="h-[1020px] w-full rounded-lg overflow-hidden">
       <MapContainer
         center={[-1.286389, 36.817223]} // Nairobi, Kenya
         zoom={12}

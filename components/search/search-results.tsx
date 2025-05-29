@@ -33,7 +33,7 @@ const mockSightings: Sighting[] = [
     timestamp: new Date(2023, 4, 15, 14, 30),
     location: "Nairobi, Moi Avenue",
     confidence: 0.98,
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl: "/images/KAA123A.png?height=200&width=300",
   },
   {
     id: "2",
@@ -41,7 +41,7 @@ const mockSightings: Sighting[] = [
     timestamp: new Date(2023, 4, 14, 9, 15),
     location: "Nairobi, Kenyatta Avenue",
     confidence: 0.95,
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl: "/images/KAA123Ac.png?height=200&width=300",
   },
   {
     id: "3",
@@ -49,7 +49,7 @@ const mockSightings: Sighting[] = [
     timestamp: new Date(2023, 4, 12, 17, 45),
     location: "Mombasa, Moi Avenue",
     confidence: 0.92,
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl: "/images/KBC456B.png?height=200&width=300",
   },
   {
     id: "4",
@@ -57,7 +57,7 @@ const mockSightings: Sighting[] = [
     timestamp: new Date(2023, 4, 10, 11, 20),
     location: "Kisumu, Main Market",
     confidence: 0.89,
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl: "/images/KDA789C.png?height=200&width=300",
   },
   {
     id: "5",
@@ -65,7 +65,7 @@ const mockSightings: Sighting[] = [
     timestamp: new Date(2023, 4, 8, 8, 10),
     location: "Eldoret, Uganda Road",
     confidence: 0.87,
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl: "/images/KCE234D.png?height=200&width=300",
   },
 ]
 

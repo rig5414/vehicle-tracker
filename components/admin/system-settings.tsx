@@ -15,11 +15,11 @@ const formSchema = z.object({
   detectionThreshold: z.number().min(0.5).max(1),
   maxConcurrentJobs: z.number().int().min(1).max(10),
   retentionPeriod: z.number().int().min(1).max(365),
-  enableNotifications: z.boolean().default(true),
+  enableNotifications: z.boolean(),
   notificationEmail: z.string().email().optional(),
-  mapProvider: z.string().default("google"),
-  enableAuditLog: z.boolean().default(true),
-  enablePublicAPI: z.boolean().default(false),
+  mapProvider: z.string(),
+  enableAuditLog: z.boolean(),
+  enablePublicAPI: z.boolean(),
 })
 
 export function SystemSettings() {
@@ -33,7 +33,7 @@ export function SystemSettings() {
       retentionPeriod: 90,
       enableNotifications: true,
       notificationEmail: "admin@example.com",
-      mapProvider: "google",
+      mapProvider: "osm",
       enableAuditLog: true,
       enablePublicAPI: false,
     },
@@ -149,9 +149,9 @@ export function SystemSettings() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="google">Google Maps</SelectItem>
-                      <SelectItem value="mapbox">Mapbox</SelectItem>
                       <SelectItem value="osm">OpenStreetMap</SelectItem>
+                      <SelectItem value="google">Google Maps</SelectItem>
+                      <SelectItem value="mapbox">MapBox</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>Provider for map visualization</FormDescription>

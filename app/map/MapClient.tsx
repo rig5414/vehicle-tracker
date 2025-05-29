@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 
 // Import map components with noSSR
 const MapView = dynamic(
-  () => import("@/components/map/map-view").then((mod) => mod.default),
+  () => import("@/components/map/map-view").then((mod) => mod.MapView),
   { 
     ssr: false,
     loading: () => (
@@ -17,12 +17,12 @@ const MapView = dynamic(
 );
 
 const MapControls = dynamic(
-  () => import("@/components/map/map-controls").then((mod) => mod.default),
+  () => import("@/components/map/map-controls").then((mod) => mod.MapControls),
   { ssr: false }
 );
 
 const MapTimeline = dynamic(
-  () => import("@/components/map/map-timeline").then((mod) => mod.default),
+  () => import("@/components/map/map-timeline").then((mod) => mod.MapTimeline),
   { ssr: false }
 );
 
